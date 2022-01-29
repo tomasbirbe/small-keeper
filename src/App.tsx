@@ -1,6 +1,12 @@
-import React from "react";
-import Home from "components/Home";
+import React from 'react';
+import { Stack } from '@chakra-ui/react';
+
+import Home from './components/Home';
 
 export default function App() {
-  return <Home />;
+  return (
+    <Stack as="main">
+      <Home />
+    </Stack>
+  );
 }

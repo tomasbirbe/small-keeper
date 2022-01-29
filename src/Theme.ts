@@ -1,14 +1,47 @@
-export const Theme = {
-  // Colors
+import { extendTheme } from '@chakra-ui/react';
 
-  primary: "#2B4162",
-  primaryDark: "#22344E",
-  secondary: "#44669A",
-  gray: "#829399",
-  blush: "#E75A7C",
+const theme = extendTheme({
+  fonts: {
+    body: 'karla',
+  },
 
-  // Font size
+  styles: {
+    global: {
+      '*, *::before, *::after': {
+        boxSizing: 'border-box',
+      },
 
-  1: "16px",
-  2: "20px",
-};
+      '*': {
+        margin: '0',
+      },
+
+      'html, body': {
+        height: '100%',
+      },
+
+      body: {
+        lineHeight: 1.5,
+        '-webkit-font-smoothing': 'antialiased',
+      },
+
+      'img, picture, video, canvas, svg': {
+        display: 'block',
+        'max-inline-size': '100%',
+      },
+
+      'input, button, textarea, select ': {
+        font: 'inherit',
+      },
+
+      'p, h1, h2, h3, h4, h5, h6': {
+        'overflow-wrap': 'break-word',
+      },
+
+      '#root, #__next': {
+        isolation: 'isolate',
+      },
+    },
+  },
+});
+
+export default theme;

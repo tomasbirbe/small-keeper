@@ -7,7 +7,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.8.1",
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@fontsource/karla": "^4.5.1",
     "eslint-plugin-react-hooks": "^4.3.0",
+    "framer-motion": "^5.6.0",
     "prettier": "^2.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
@@ -29,6 +34,7 @@
     "eslint-plugin-promise": "^5.2.0",
     "eslint-plugin-react": "^7.28.0",
     "typescript": "^4.4.4",
-    "vite": "^2.7.2"
+    "vite": "^2.7.2",
+    "vite-tsconfig-paths": "^3.3.17"
   }
 }
