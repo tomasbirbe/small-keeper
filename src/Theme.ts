@@ -5,6 +5,42 @@ const theme = extendTheme({
     body: 'karla',
   },
 
+  colors: {
+    primary: '#2B4162',
+    primaryDarker: '#22344E',
+    secondary: '#44669A',
+    danger: '#E75A7C',
+  },
+
+  components: {
+    List: {
+      baseStyle: {
+        container: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2em',
+          width: '100%',
+          defaultProps: {
+            variant: '',
+          },
+        },
+        item: {
+          paddingBlock: 4,
+          paddingInline: 5,
+          borderRadius: '1em',
+          width: '100%',
+          background: 'secondary',
+          textAlign: 'left',
+          fontSize: '1.2em',
+          transition: 'all 100ms ease-in-out',
+        },
+        defaultProps: {
+          variant: '',
+        },
+      },
+    },
+  },
+
   styles: {
     global: {
       '*, *::before, *::after': {
@@ -13,20 +49,22 @@ const theme = extendTheme({
 
       '*': {
         margin: '0',
+        color: 'white',
       },
 
-      'html, body': {
+      '#root,html, body': {
         height: '100%',
       },
 
       body: {
         lineHeight: 1.5,
-        '-webkit-font-smoothing': 'antialiased',
+        webkitFontSmoothing: 'antialiased',
+        background: 'primary',
       },
 
       'img, picture, video, canvas, svg': {
         display: 'block',
-        'max-inline-size': '100%',
+        maxInlineSize: '100%',
       },
 
       'input, button, textarea, select ': {
@@ -34,7 +72,7 @@ const theme = extendTheme({
       },
 
       'p, h1, h2, h3, h4, h5, h6': {
-        'overflow-wrap': 'break-word',
+        overflowWrap: 'break-word',
       },
 
       '#root, #__next': {
