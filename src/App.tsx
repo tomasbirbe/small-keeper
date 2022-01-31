@@ -1,12 +1,12 @@
 import React from 'react';
-import { Stack } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 
 import Home from './components/Home';
 
 export default function App() {
   return (
-    <Stack as="main" height="full" spacing="0" width="full">
+    <Box as="main" display="grid" height="full" overflow="hidden" placeItems="center" width="full">
       <Home />
-    </Stack>
+    </Box>
   );
 }

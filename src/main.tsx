@@ -4,7 +4,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import '@fontsource/karla';
 
 import App from './App';
-import theme from './theme';
+import theme from './Theme';
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>
