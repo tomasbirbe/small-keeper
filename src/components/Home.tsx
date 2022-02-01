@@ -2,12 +2,28 @@ import { Box, List, ListItem, Text, Stack, Button, Icon, Input } from '@chakra-u
 import { MdDelete, MdEdit } from 'react-icons/md';
 import React, { useState } from 'react';
 
+const entries = [
+  { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
+  { id: 2, name: 'Naranja', user: 'Tomas', password: 'Birbe' },
+  { id: 3, name: 'League of Legends', user: 'Tomas', password: 'Birbe' },
+  { id: 4, name: 'Twitter', user: 'Tomas', password: 'Birbe' },
+];
+
+interface entry {
+  id: number;
+  name: string;
+  user: string;
+  password: string;
+}
+
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [isEdit, setEdit] = useState(false);
+  const [entry, setEntry] = useState<entry | undefined>(undefined);
 
-  function onOpen() {
+  function onOpen(entry?: entry | undefined) {
     setIsOpen(true);
+    setEntry(entry);
   }
 
   function onClose() {
@@ -34,39 +50,11 @@ export default function Home() {
       >
         <Box as="article" maxWidth="700px" paddingBlock={10} paddingInline={7} width="full">
           <List align="center" justify="flex-start" listStyleType="none">
-            <ListItem onClick={onOpen}>
-              <Text>Banco nacion</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Naranja</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Facebook</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
-            <ListItem>
-              <Text>Twitter</Text>
-            </ListItem>
+            {entries.map((entry) => (
+              <ListItem key={entry.id} onClick={() => onOpen(entry)}>
+                {entry.name}
+              </ListItem>
+            ))}
           </List>
         </Box>
       </Box>
@@ -154,7 +142,7 @@ export default function Home() {
                 fontSize="1.2em"
                 padding="0"
                 textAlign="center"
-                value="Banco Nacion"
+                value={entry?.name}
                 width="200px"
               />
               <Button
@@ -178,7 +166,7 @@ export default function Home() {
                   border="none"
                   borderRadius="15px;"
                   paddingBlock={7}
-                  value="Banco Nacion"
+                  value={entry?.user}
                 />
               </ListItem>
               <ListItem bg="primaryDarker" fontSize="1em" padding="0">
@@ -188,7 +176,7 @@ export default function Home() {
                   border="none"
                   borderRadius="15px;"
                   paddingBlock={7}
-                  value="adfasdfasdf"
+                  value={entry?.password}
                 />
               </ListItem>
             </List>
