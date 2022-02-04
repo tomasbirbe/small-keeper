@@ -12,7 +12,7 @@ const Credentials = ({ entryState, isEdit }: { entryState: entryState; isEdit: b
 
   return (
     <List align="center" justify="flex-start" listStyleType="none">
-      <ListItem bg="primaryDarker" fontSize="1em" padding="0">
+      <ListItem bg="primaryDarker" padding="0">
         <Input
           _disabled={{}}
           border="none"
@@ -23,7 +23,7 @@ const Credentials = ({ entryState, isEdit }: { entryState: entryState; isEdit: b
           onChange={(e) => setEntry(Object.assign({}, entry, { user: e.target.value }))}
         />
       </ListItem>
-      <ListItem bg="primaryDarker" fontSize="1em" padding="0">
+      <ListItem bg="primaryDarker" padding="0">
         <Input
           _disabled={{}}
           border="none"

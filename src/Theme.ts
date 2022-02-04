@@ -41,7 +41,6 @@ const theme = extendTheme({
           width: '100%',
           background: 'secondary',
           textAlign: 'left',
-          fontSize: '1.2em',
           transition: 'all 100ms ease-in-out',
         },
         defaultProps: {
@@ -64,6 +63,10 @@ const theme = extendTheme({
 
       '#root,html, body': {
         height: '100%',
+      },
+
+      html: {
+        fontSize: '1.2em',
       },
 
       body: {
