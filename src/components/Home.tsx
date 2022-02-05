@@ -1,23 +1,13 @@
-import {
-  Box,
-  Button,
-  Divider,
-  FormLabel,
-  Input,
-  List,
-  ListItem,
-  Stack,
-  TagLabel,
-  Text,
-} from '@chakra-ui/react';
+import { Box, Button, Divider, Input, List, ListItem, Stack, Text } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { entry } from 'types/types';
 
 import AccountCard from './AccountCard/AccountCard';
-import Credentials from './AccountCard/Credentials';
 import Modal from './Modal/Modal';
 import Overlay from './Modal/Overlay';
 import Title from './AccountCard/Title';
+import UpdateForm from './UpdateForm/UpdateForm';
+import Field from './UpdateForm/Field';
 
 const INITIAL_ENTRIES = [
   { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
@@ -34,11 +24,13 @@ const INITIAL_ENTRY = {
 };
 
 export default function Home() {
+  const [entries, setEntries] = useState(INITIAL_ENTRIES);
+  const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
+  const [modifiedEntry, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
+  const [newEntry, setNewEntry] = useState<string>('');
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
-  const [entries, setEntries] = useState(INITIAL_ENTRIES);
-  const [modifiedEntry, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   function openModal(entry: entry) {
     setModalIsOpen(true);
@@ -49,25 +41,35 @@ export default function Home() {
   function dismissModal() {
     setModalIsOpen(false);
     if (isEdit) {
-      offEdit();
+      setIsEdit(false);
     }
   }
 
-  function onEdit() {
-    setIsEdit(true);
+  function abortEdit() {
+    setModifiedEntry(entry);
+    setIsEdit(false);
   }
 
-  function offEdit() {
-    setIsEdit(false);
+  function deleteEntry() {
+    const filteredEntries = entries.filter((ent) => ent.id !== entry.id);
+
+    setEntries(filteredEntries);
+    setIsDeleting(false);
+    dismissModal();
   }
 
   function saveEntry(e: any) {
     e.preventDefault();
-    const filterEntries = entries.filter((ent) => ent.id !== entry.id);
+    const filteredEntries = entries.filter((ent) => ent.id !== entry.id);
+    const updatedEntries = [...filteredEntries, modifiedEntry];
 
-    setEntries([...filterEntries, modifiedEntry]);
+    const sortedEntries = updatedEntries.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
+
+    setEntries(sortedEntries);
     setEntry(modifiedEntry);
-    offEdit();
+    setIsEdit(false);
   }
 
   function protectPassword(text: string) {
@@ -88,6 +90,43 @@ export default function Home() {
       >
         <Box as="article" maxWidth="700px" paddingBlock={10} paddingInline={7} width="full">
           <List align="center" justify="flex-start" listStyleType="none">
+            <ListItem paddingBlock={2} paddingInline={1}>
+              <Stack as="form" justify="center">
+                <Input
+                  autoFocus
+                  _focus={{}}
+                  _hover={{}}
+                  border="none"
+                  onChange={(e) => setNewEntry(e.target.value)}
+                />
+                <Stack
+                  direction="row"
+                  display={newEntry ? 'flex' : 'none'}
+                  fontSize="0.8em"
+                  justify="space-between"
+                  paddingBlock={4}
+                  paddingInline={4}
+                >
+                  <Field id="createUser" label="Usuario" />
+                  <Field id="createPassword" label="Clave" />
+                </Stack>
+                <Stack
+                  direction="row"
+                  display={newEntry ? 'flex' : 'none'}
+                  fontSize="0.8em"
+                  justify="space-between"
+                  paddingBlock={4}
+                  paddingInline={4}
+                >
+                  <Button _active={{}} _hover={{ bg: 'white', color: 'black' }} bg="transparent">
+                    Cancelar
+                  </Button>
+                  <Button _active={{}} color="black" type="submit">
+                    Guardar
+                  </Button>
+                </Stack>
+              </Stack>
+            </ListItem>
             {entries.map((entry) => (
               <ListItem key={entry.id} onClick={() => openModal(entry)}>
                 {entry.name}
@@ -97,77 +136,71 @@ export default function Home() {
         </Box>
       </Box>
 
-      <Modal isOpen={isEdit} zIndex="1">
+      {/* Confirm delete modal */}
+
+      <Modal isOpen={isDeleting} zIndex="1">
         <Stack
-          as="form"
-          bg="secondary"
+          bg="primary"
           borderRadius="15px"
-          bottom={isEdit ? '0' : '-100%'}
-          boxShadow="0px 1.1px 3.5px rgba(0, 0, 0, 0.051),
-          0px 2.7px 8.3px rgba(41, 36, 36, 0.073),
-          0px 5px 15.7px rgba(0, 0, 0, 0.09),
-          0px 8.9px 27.9px rgba(0, 0, 0, 0.107),
-          0px 16.7px 52.2px rgba(0, 0, 0, 0.129),
-          0px 40px 125px rgba(0, 0, 0, 0.18)"
-          height="550px"
-          id="updateForm"
-          justify="space-around"
-          maxWidth="400px"
-          minWidth="300px"
-          paddingBlock={5}
-          paddingInline={8}
-          position="relative"
-          transition="all 400ms ease-in-out"
-          width="90%"
-          onSubmit={saveEntry}
+          opacity={isDeleting ? '1' : '0'}
+          padding={7}
+          spacing={7}
+          transition="all 200ms ease-in-out"
         >
           <Box>
-            <FormLabel fontSize="1.2em" htmlFor="entryName">
-              Entry name
-            </FormLabel>
-            <Input
-              _focus={{}}
-              bg="primaryDarker"
-              border="none"
-              id="entryName"
-              value={modifiedEntry?.name}
-              onChange={(e) => setModifiedEntry({ ...modifiedEntry, name: e.target.value })}
-            />
+            <Text>Estas a punto de eliminar los datos de</Text>
+            <Text fontWeight="700">{entry?.name}</Text>
           </Box>
-
           <Divider />
+          <Stack direction="row" justify="space-between">
+            <Button
+              _hover={{ border: '1px solid white', bg: 'white', color: 'black' }}
+              bg="transparent"
+              border="1px solid white"
+              color="white"
+              onClick={() => setIsDeleting(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              _active={{}}
+              _hover={{ bg: 'danger' }}
+              bg="white"
+              color="black"
+              transition="background 200ms ease-in-out"
+              onClick={deleteEntry}
+            >
+              Eliminar
+            </Button>
+          </Stack>
+        </Stack>
+      </Modal>
 
-          <Box>
-            <FormLabel fontSize="1em" htmlFor="user">
-              User
-            </FormLabel>
-            <Input
-              _focus={{}}
-              bg="primaryDarker"
-              border="none"
-              id="user"
-              value={modifiedEntry?.user}
-              onChange={(e) => setModifiedEntry({ ...modifiedEntry, user: e.target.value })}
-            />
-          </Box>
+      {/* Update modal */}
 
-          <Box marginBlockEnd="1em">
-            <FormLabel fontSize="1em" htmlFor="password">
-              Password
-            </FormLabel>
-            <Input
-              _focus={{}}
-              bg="primaryDarker"
-              border="none"
-              id="password"
-              type="password"
-              value={modifiedEntry?.password}
-              onChange={(e) => setModifiedEntry({ ...modifiedEntry, password: e.target.value })}
-            />
-          </Box>
-
+      <Modal isOpen={isEdit} zIndex="1">
+        <UpdateForm isEdit={isEdit} onSubmit={saveEntry}>
+          <Field
+            id="entryName"
+            label="Nombre de la cuenta"
+            value={modifiedEntry?.name}
+            onChange={(e) => setModifiedEntry({ ...modifiedEntry, name: e.target.value })}
+          />
           <Divider />
-
+          <Field
+            id="user"
+            label="Usuario"
+            value={modifiedEntry?.user}
+            onChange={(e) => setModifiedEntry({ ...modifiedEntry, user: e.target.value })}
+          />
+          <Divider />
+          <Field
+            id="password"
+            label="Clave"
+            value={modifiedEntry?.password}
+            onChange={(e) => setModifiedEntry({ ...modifiedEntry, password: e.target.value })}
+          />
+          <Divider />
           <Stack flexDirection="row" justify="space-between" spacing={0}>
             <Button
               _focus={{ bg: 'white', color: 'black' }}
@@ -175,7 +208,7 @@ export default function Home() {
               bg="transparent"
               border="1px solid white"
               transition="all 200ms white"
-              onClick={offEdit}
+              onClick={abortEdit}
             >
               Cancelar
             </Button>
@@ -183,39 +216,37 @@ export default function Home() {
               Guardar
             </Button>
           </Stack>
-        </Stack>
+        </UpdateForm>
       </Modal>
+
+      {/* Account modal */}
 
       <Modal isOpen={modalIsOpen}>
         <Overlay hideModal={dismissModal} />
         <AccountCard isEntryDataOpen={modalIsOpen}>
           <Title entryState={{ entry, setEntry }} />
-          {/* <Credentials entryState={{ entry, setEntry }} isEdit={isEdit} /> */}
-          <List align="center" justify="flex-start" listStyleType="none">
-            <ListItem bg="primaryDarker" padding="0">
-              <Text
-                _disabled={{}}
-                border="none"
-                borderRadius="15px;"
-                disabled={!isEdit}
-                paddingBlock={7}
-                onChange={(e) => setEntry(Object.assign({}, entry, { user: e.target.value }))}
-              >
-                {entry?.user}
-              </Text>
-            </ListItem>
-            <ListItem bg="primaryDarker" padding="0">
-              <Input
-                _disabled={{}}
-                border="none"
-                borderRadius="15px;"
-                disabled={!isEdit}
-                paddingBlock={7}
-                value={entry?.password}
-                onChange={(e) => setEntry(Object.assign({}, entry, { password: e.target.value }))}
-              />
-            </ListItem>
-          </List>
+          <Text
+            bg="primaryDarker"
+            border="none"
+            borderRadius="15px;"
+            disabled={!isEdit}
+            paddingBlock={4}
+            paddingInline={4}
+          >
+            {entry?.user}
+          </Text>
+          <Text
+            bg="primaryDarker"
+            border="none"
+            borderRadius="15px;"
+            disabled={!isEdit}
+            paddingBlockEnd={3}
+            paddingBlockStart={5}
+            paddingInline={4}
+          >
+            {protectPassword(entry?.password)}
+          </Text>
+
           <Stack align="center" flexDirection="row" justify="space-between" spacing="0">
             <Button
               _hover={{ bg: 'danger', color: 'black', borderColor: 'danger' }}
@@ -224,11 +255,17 @@ export default function Home() {
               maxWidth="400px"
               type="button"
               width="40%"
-              onClick={dismissModal}
+              onClick={() => setIsDeleting(true)}
             >
               Eliminar
             </Button>
-            <Button color="black" maxWidth="400px" type="button" width="40%" onClick={onEdit}>
+            <Button
+              color="black"
+              maxWidth="400px"
+              type="button"
+              width="40%"
+              onClick={() => setIsEdit(true)}
+            >
               Editar
             </Button>
           </Stack>

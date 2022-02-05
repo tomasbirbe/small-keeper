@@ -20,6 +20,7 @@ const theme = extendTheme({
     primaryDarker: '#22344E',
     secondary: '#44669A',
     danger: '#E75A7C',
+    dangerDarker: '#E2325B',
   },
 
   components: {
