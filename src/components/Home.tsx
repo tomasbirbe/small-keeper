@@ -1,5 +1,19 @@
-import { Box, Button, Divider, Input, List, ListItem, Stack, Text } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  Divider,
+  Icon,
+  Input,
+  List,
+  ListItem,
+  Stack,
+  Text,
+  useToast,
+} from '@chakra-ui/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { BsChevronDown } from 'react-icons/bs';
+import { RiFileCopyLine } from 'react-icons/ri';
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlus } from 'react-icons/ai';
 import { entry } from 'types/types';
 
 import AccountCard from './AccountCard/AccountCard';
@@ -22,14 +36,27 @@ const INITIAL_ENTRY = {
   password: '',
 };
 
+/* -------------------------------------------------------------------------- */
+/*                                    To do                                   */
+/* -------------------------------------------------------------------------- */
+
+/* 
+  1- Split code based on its functionality.
+  2- Fix tabIndex default or tab order.
+  3- Try with Kent c Dodd's modal model.
+*/
+
 export default function Home() {
   const [entries, setEntries] = useState(INITIAL_ENTRIES);
   const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
   const [modifiedEntry, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
   const [isCreatingEntry, setIsCreatingEntry] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true);
+  const inputRef = useRef<any>();
+  const toast = useToast();
 
   function openModal(entry: entry) {
     setModalIsOpen(true);
@@ -77,12 +104,40 @@ export default function Home() {
     return password;
   }
 
+  useEffect(() => {
+    if (isCreatingEntry) {
+      (document.querySelector('#newUser') as HTMLInputElement).focus();
+    }
+  }, [isCreatingEntry]);
+
+  useEffect(() => {
+    if (isEdit === true) {
+      (document.querySelector('#modifyAccountName') as HTMLInputElement).focus();
+    }
+  }, [isEdit]);
+
   function createNewEntry(e: any) {
     e.preventDefault();
     const newEntry = e.target[0].value.trim();
 
     if (newEntry === '') {
       e.target[0].value = newEntry;
+      toast({
+        duration: 2000,
+        position: 'top-right',
+        render: () => (
+          <Box
+            bg="primaryDarker"
+            borderRadius="15px"
+            paddingBlock={2}
+            paddingInline={6}
+            textAlign="center"
+            width="fit-content"
+          >
+            <Text>La cuenta debe tener un nombre</Text>
+          </Box>
+        ),
+      });
 
       return '';
     }
@@ -93,6 +148,8 @@ export default function Home() {
 
   function closeNewEntryModal() {
     setIsCreatingEntry(false);
+    (document.getElementById('newUser') as HTMLInputElement)!.value = '';
+    (document.getElementById('newPassword') as HTMLInputElement)!.value = '';
   }
 
   function createEntry(e: any) {
@@ -111,6 +168,34 @@ export default function Home() {
     e.target[1].value = '';
   }
 
+  function togglePasswordVisibility() {
+    if (isPasswordHide) {
+      setIsPasswordHide(false);
+    } else {
+      setIsPasswordHide(true);
+    }
+  }
+
+  function copyValue(value: string) {
+    navigator.clipboard.writeText(value);
+    toast({
+      duration: 2000,
+      position: 'top-right',
+      render: () => (
+        <Box
+          bg="primaryDarker"
+          borderRadius="15px"
+          paddingBlock={2}
+          paddingInline={6}
+          textAlign="center"
+          width="fit-content"
+        >
+          Copiado!
+        </Box>
+      ),
+    });
+  }
+
   return (
     <>
       <Box
@@ -125,9 +210,15 @@ export default function Home() {
           <List align="center" justify="flex-start" listStyleType="none">
             <ListItem paddingBlock={2} paddingInlineEnd={4} paddingInlineStart={1}>
               <Stack as="form" direction="row" onSubmit={createNewEntry}>
-                <Input autoFocus _focus={{}} _hover={{}} border="none" />
-                <Button bg="primaryDarker" borderRadius="50%" type="submit">
-                  +
+                <Input
+                  autoFocus
+                  _focus={{}}
+                  _hover={{}}
+                  border="none"
+                  placeholder="Tipea y crea una nueva cuenta!"
+                />
+                <Button type="submit" variant="iconButton">
+                  <Icon as={AiOutlinePlus} />
                 </Button>
               </Stack>
             </ListItem>
@@ -146,7 +237,7 @@ export default function Home() {
         <ModalForm id="createForm" showForm={isCreatingEntry} onSubmit={createEntry}>
           <Text fontSize="1.4em">{entry?.name}</Text>
           <Divider />
-          <Field id="newUser" label="Usuario" />
+          <Field id="newUser" inputRef={inputRef} label="Usuario" />
           <Field id="newPassword" label="Clave" type="password" />
           <Divider />
           <Stack flexDirection="row" justify="space-between" spacing={0}>
@@ -154,6 +245,103 @@ export default function Home() {
               Cancelar
             </Button>
             <Button form="createForm" type="submit" variant="primaryAction">
+              Guardar
+            </Button>
+          </Stack>
+        </ModalForm>
+      </Modal>
+
+      {/* Account modal */}
+
+      <Modal isOpen={modalIsOpen}>
+        <Overlay hideModal={dismissModal} />
+        <AccountCard isEntryDataOpen={modalIsOpen}>
+          <Button height="fit-content" onClick={dismissModal}>
+            <Icon as={BsChevronDown} boxSize={5} color="primary" />
+          </Button>
+          <Text variant="title">{entry?.name}</Text>
+          <Stack
+            align="center"
+            bg="primaryDarker"
+            borderRadius="15px"
+            direction="row"
+            justify="space-between"
+            paddingBlock={2}
+            paddingInline={4}
+            spacing={0}
+          >
+            <Text>{entry?.user}</Text>
+            <Stack direction="row" spacing={0}>
+              <Button variant="iconButton" onClick={() => copyValue(entry?.user)}>
+                <Icon as={RiFileCopyLine} />
+              </Button>
+            </Stack>
+          </Stack>
+          <Stack
+            align="center"
+            bg="primaryDarker"
+            borderRadius="15px"
+            direction="row"
+            justify="space-between"
+            paddingBlock={2}
+            paddingInline={4}
+            spacing={0}
+          >
+            <Text marginBlockStart={isPasswordHide ? 2 : 0}>
+              {isPasswordHide ? protectPassword(entry?.password) : entry?.password}
+            </Text>
+            <Stack direction="row" spacing={0}>
+              <Button variant="iconButton" onClick={togglePasswordVisibility}>
+                <Icon as={isPasswordHide ? AiOutlineEye : AiOutlineEyeInvisible} />
+              </Button>
+              <Button variant="iconButton" onClick={() => copyValue(entry?.password)}>
+                <Icon as={RiFileCopyLine} />
+              </Button>
+            </Stack>
+          </Stack>
+
+          <Stack align="center" flexDirection="row" justify="space-between" spacing="0">
+            <Button type="button" variant="dangerAction" onClick={() => setIsDeleting(true)}>
+              Eliminar
+            </Button>
+            <Button type="button" variant="primaryAction" onClick={() => setIsEdit(true)}>
+              Editar
+            </Button>
+          </Stack>
+        </AccountCard>
+      </Modal>
+
+      {/* Update modal */}
+
+      <Modal isOpen={isEdit} zIndex="1">
+        <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveEntry}>
+          <Field
+            id="modifyAccountName"
+            label="Nombre de la cuenta"
+            value={modifiedEntry?.name}
+            onChange={(e) => setModifiedEntry({ ...modifiedEntry, name: e.target.value })}
+          />
+          <Divider />
+          <Field
+            id="modifyUser"
+            label="Usuario"
+            value={modifiedEntry?.user}
+            onChange={(e) => setModifiedEntry({ ...modifiedEntry, user: e.target.value })}
+          />
+          <Divider />
+          <Field
+            id="modifyPassword"
+            label="Clave"
+            type="password"
+            value={modifiedEntry?.password}
+            onChange={(e) => setModifiedEntry({ ...modifiedEntry, password: e.target.value })}
+          />
+          <Divider />
+          <Stack flexDirection="row" justify="space-between" spacing={0}>
+            <Button variant="secondaryAction" onClick={abortEdit}>
+              Cancelar
+            </Button>
+            <Button form="updateForm" type="submit" variant="primaryAction">
               Guardar
             </Button>
           </Stack>
@@ -177,71 +365,14 @@ export default function Home() {
           </Box>
           <Divider />
           <Stack direction="row" justify="space-between">
-            <Button variant="secondaryAction" onClick={() => setIsDeleting(false)}>
+            <Button variant="primaryAction" onClick={() => setIsDeleting(false)}>
               Cancelar
             </Button>
-            <Button _hover={{ bg: 'danger' }} variant="primaryAction" onClick={deleteEntry}>
+            <Button variant="dangerAction" onClick={deleteEntry}>
               Eliminar
             </Button>
           </Stack>
         </Stack>
-      </Modal>
-
-      {/* Update modal */}
-
-      <Modal isOpen={isEdit} zIndex="1">
-        <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveEntry}>
-          <Field
-            id="entryName"
-            label="Nombre de la cuenta"
-            value={modifiedEntry?.name}
-            onChange={(e) => setModifiedEntry({ ...modifiedEntry, name: e.target.value })}
-          />
-          <Divider />
-          <Field
-            id="user"
-            label="Usuario"
-            value={modifiedEntry?.user}
-            onChange={(e) => setModifiedEntry({ ...modifiedEntry, user: e.target.value })}
-          />
-          <Divider />
-          <Field
-            id="password"
-            label="Clave"
-            type="password"
-            value={modifiedEntry?.password}
-            onChange={(e) => setModifiedEntry({ ...modifiedEntry, password: e.target.value })}
-          />
-          <Divider />
-          <Stack flexDirection="row" justify="space-between" spacing={0}>
-            <Button variant="secondaryAction" onClick={abortEdit}>
-              Cancelar
-            </Button>
-            <Button form="updateForm" type="submit" variant="primaryAction">
-              Guardar
-            </Button>
-          </Stack>
-        </ModalForm>
-      </Modal>
-
-      {/* Account modal */}
-
-      <Modal isOpen={modalIsOpen}>
-        <Overlay hideModal={dismissModal} />
-        <AccountCard isEntryDataOpen={modalIsOpen}>
-          <Text variant="title">{entry?.name}</Text>
-          <Text variant="user">{entry?.user}</Text>
-          <Text variant="password">{protectPassword(entry?.password)}</Text>
-
-          <Stack align="center" flexDirection="row" justify="space-between" spacing="0">
-            <Button type="button" variant="dangerAction" onClick={() => setIsDeleting(true)}>
-              Eliminar
-            </Button>
-            <Button type="button" variant="primaryAction" onClick={() => setIsEdit(true)}>
-              Editar
-            </Button>
-          </Stack>
-        </AccountCard>
       </Modal>
     </>
   );

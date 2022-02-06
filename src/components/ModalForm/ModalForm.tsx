@@ -28,7 +28,7 @@ const ModalForm = ({ children, showForm, id, onSubmit }: params) => {
       minWidth="300px"
       opacity={showForm ? '1' : '0'}
       paddingBlock={5}
-      paddingInline={8}
+      paddingInline={6}
       // transition="all 1000ms cubic-bezier(.43,0,0,1.24)"
       position="relative"
       transition="all 200ms ease-in-out"

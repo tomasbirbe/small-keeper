@@ -18,12 +18,26 @@ const theme = extendTheme({
   colors: {
     primary: '#2B4162',
     primaryDarker: '#22344E',
+    primaryDarkerHover: '#1D2D43',
+    primaryDarkerActive: '#182538',
     secondary: '#44669A',
     danger: '#E75A7C',
     dangerDarker: '#E2325B',
   },
 
   components: {
+    Box: {
+      variants: {
+        user: {
+          bg: 'primaryDarker',
+          border: 'none',
+          display: 'flex',
+          borderRadius: '15px;',
+          paddingBlock: 4,
+          paddingInline: 4,
+        },
+      },
+    },
     Text: {
       variants: {
         title: {
@@ -54,7 +68,7 @@ const theme = extendTheme({
     },
     Button: {
       baseStyle: {
-        _focus: { boxShadow: 'none' },
+        _focus: {},
         _hover: {},
         _active: {},
         _disabled: {},
@@ -84,6 +98,17 @@ const theme = extendTheme({
             bg: 'danger',
             border: '1px solid',
             borderColor: 'danger',
+          },
+        },
+        iconButton: {
+          borderRadius: '50%',
+          padding: 0,
+          bg: 'primaryDarker',
+          _hover: {
+            bg: 'primaryDarkerHover',
+          },
+          _active: {
+            bg: 'primaryDarkerActive',
           },
         },
       },
