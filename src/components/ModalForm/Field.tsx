@@ -8,7 +8,7 @@ interface params {
   onChange?: (e: any) => void;
 }
 
-const Field = ({ value, onChange = undefined, id, label, ...props }: params) => {
+const Field = ({ value = undefined, onChange = undefined, id, label, ...props }: params) => {
   return (
     <Box>
       <FormLabel fontSize="1.2em" htmlFor={id}>

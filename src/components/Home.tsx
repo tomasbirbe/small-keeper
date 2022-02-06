@@ -1,13 +1,12 @@
 import { Box, Button, Divider, Input, List, ListItem, Stack, Text } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { entry } from 'types/types';
 
 import AccountCard from './AccountCard/AccountCard';
 import Modal from './Modal/Modal';
 import Overlay from './Modal/Overlay';
-import Title from './AccountCard/Title';
-import UpdateForm from './UpdateForm/UpdateForm';
-import Field from './UpdateForm/Field';
+import Field from './ModalForm/Field';
+import ModalForm from './ModalForm/ModalForm';
 
 const INITIAL_ENTRIES = [
   { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
@@ -27,7 +26,7 @@ export default function Home() {
   const [entries, setEntries] = useState(INITIAL_ENTRIES);
   const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
   const [modifiedEntry, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
-  const [newEntry, setNewEntry] = useState<string>('');
+  const [isCreatingEntry, setIsCreatingEntry] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -78,6 +77,40 @@ export default function Home() {
     return password;
   }
 
+  function createNewEntry(e: any) {
+    e.preventDefault();
+    const newEntry = e.target[0].value.trim();
+
+    if (newEntry === '') {
+      e.target[0].value = newEntry;
+
+      return '';
+    }
+    setIsCreatingEntry(true);
+    setEntry({ ...entry, name: e.target[0].value });
+    e.target[0].value = '';
+  }
+
+  function closeNewEntryModal() {
+    setIsCreatingEntry(false);
+  }
+
+  function createEntry(e: any) {
+    e.preventDefault();
+    setEntries([
+      ...entries,
+      {
+        ...entry,
+        id: Math.random() * 1000 * new Date().getTime(),
+        user: e.target[0].value,
+        password: e.target[1].value,
+      },
+    ]);
+    setIsCreatingEntry(false);
+    e.target[0].value = '';
+    e.target[1].value = '';
+  }
+
   return (
     <>
       <Box
@@ -90,41 +123,12 @@ export default function Home() {
       >
         <Box as="article" maxWidth="700px" paddingBlock={10} paddingInline={7} width="full">
           <List align="center" justify="flex-start" listStyleType="none">
-            <ListItem paddingBlock={2} paddingInline={1}>
-              <Stack as="form" justify="center">
-                <Input
-                  autoFocus
-                  _focus={{}}
-                  _hover={{}}
-                  border="none"
-                  onChange={(e) => setNewEntry(e.target.value)}
-                />
-                <Stack
-                  direction="row"
-                  display={newEntry ? 'flex' : 'none'}
-                  fontSize="0.8em"
-                  justify="space-between"
-                  paddingBlock={4}
-                  paddingInline={4}
-                >
-                  <Field id="createUser" label="Usuario" />
-                  <Field id="createPassword" label="Clave" />
-                </Stack>
-                <Stack
-                  direction="row"
-                  display={newEntry ? 'flex' : 'none'}
-                  fontSize="0.8em"
-                  justify="space-between"
-                  paddingBlock={4}
-                  paddingInline={4}
-                >
-                  <Button _active={{}} _hover={{ bg: 'white', color: 'black' }} bg="transparent">
-                    Cancelar
-                  </Button>
-                  <Button _active={{}} color="black" type="submit">
-                    Guardar
-                  </Button>
-                </Stack>
+            <ListItem paddingBlock={2} paddingInlineEnd={4} paddingInlineStart={1}>
+              <Stack as="form" direction="row" onSubmit={createNewEntry}>
+                <Input autoFocus _focus={{}} _hover={{}} border="none" />
+                <Button bg="primaryDarker" borderRadius="50%" type="submit">
+                  +
+                </Button>
               </Stack>
             </ListItem>
             {entries.map((entry) => (
@@ -135,6 +139,26 @@ export default function Home() {
           </List>
         </Box>
       </Box>
+
+      {/* Add new entry */}
+
+      <Modal isOpen={isCreatingEntry} zIndex="1">
+        <ModalForm id="createForm" showForm={isCreatingEntry} onSubmit={createEntry}>
+          <Text fontSize="1.4em">{entry?.name}</Text>
+          <Divider />
+          <Field id="newUser" label="Usuario" />
+          <Field id="newPassword" label="Clave" type="password" />
+          <Divider />
+          <Stack flexDirection="row" justify="space-between" spacing={0}>
+            <Button variant="secondaryAction" onClick={closeNewEntryModal}>
+              Cancelar
+            </Button>
+            <Button form="createForm" type="submit" variant="primaryAction">
+              Guardar
+            </Button>
+          </Stack>
+        </ModalForm>
+      </Modal>
 
       {/* Confirm delete modal */}
 
@@ -153,23 +177,10 @@ export default function Home() {
           </Box>
           <Divider />
           <Stack direction="row" justify="space-between">
-            <Button
-              _hover={{ border: '1px solid white', bg: 'white', color: 'black' }}
-              bg="transparent"
-              border="1px solid white"
-              color="white"
-              onClick={() => setIsDeleting(false)}
-            >
+            <Button variant="secondaryAction" onClick={() => setIsDeleting(false)}>
               Cancelar
             </Button>
-            <Button
-              _active={{}}
-              _hover={{ bg: 'danger' }}
-              bg="white"
-              color="black"
-              transition="background 200ms ease-in-out"
-              onClick={deleteEntry}
-            >
+            <Button _hover={{ bg: 'danger' }} variant="primaryAction" onClick={deleteEntry}>
               Eliminar
             </Button>
           </Stack>
@@ -179,7 +190,7 @@ export default function Home() {
       {/* Update modal */}
 
       <Modal isOpen={isEdit} zIndex="1">
-        <UpdateForm isEdit={isEdit} onSubmit={saveEntry}>
+        <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveEntry}>
           <Field
             id="entryName"
             label="Nombre de la cuenta"
@@ -197,26 +208,20 @@ export default function Home() {
           <Field
             id="password"
             label="Clave"
+            type="password"
             value={modifiedEntry?.password}
             onChange={(e) => setModifiedEntry({ ...modifiedEntry, password: e.target.value })}
           />
           <Divider />
           <Stack flexDirection="row" justify="space-between" spacing={0}>
-            <Button
-              _focus={{ bg: 'white', color: 'black' }}
-              _hover={{ bg: 'white', color: 'black' }}
-              bg="transparent"
-              border="1px solid white"
-              transition="all 200ms white"
-              onClick={abortEdit}
-            >
+            <Button variant="secondaryAction" onClick={abortEdit}>
               Cancelar
             </Button>
-            <Button color="black" form="updateForm" type="submit">
+            <Button form="updateForm" type="submit" variant="primaryAction">
               Guardar
             </Button>
           </Stack>
-        </UpdateForm>
+        </ModalForm>
       </Modal>
 
       {/* Account modal */}
@@ -224,48 +229,15 @@ export default function Home() {
       <Modal isOpen={modalIsOpen}>
         <Overlay hideModal={dismissModal} />
         <AccountCard isEntryDataOpen={modalIsOpen}>
-          <Title entryState={{ entry, setEntry }} />
-          <Text
-            bg="primaryDarker"
-            border="none"
-            borderRadius="15px;"
-            disabled={!isEdit}
-            paddingBlock={4}
-            paddingInline={4}
-          >
-            {entry?.user}
-          </Text>
-          <Text
-            bg="primaryDarker"
-            border="none"
-            borderRadius="15px;"
-            disabled={!isEdit}
-            paddingBlockEnd={3}
-            paddingBlockStart={5}
-            paddingInline={4}
-          >
-            {protectPassword(entry?.password)}
-          </Text>
+          <Text variant="title">{entry?.name}</Text>
+          <Text variant="user">{entry?.user}</Text>
+          <Text variant="password">{protectPassword(entry?.password)}</Text>
 
           <Stack align="center" flexDirection="row" justify="space-between" spacing="0">
-            <Button
-              _hover={{ bg: 'danger', color: 'black', borderColor: 'danger' }}
-              bg="transparent"
-              border="1px solid white"
-              maxWidth="400px"
-              type="button"
-              width="40%"
-              onClick={() => setIsDeleting(true)}
-            >
+            <Button type="button" variant="dangerAction" onClick={() => setIsDeleting(true)}>
               Eliminar
             </Button>
-            <Button
-              color="black"
-              maxWidth="400px"
-              type="button"
-              width="40%"
-              onClick={() => setIsEdit(true)}
-            >
+            <Button type="button" variant="primaryAction" onClick={() => setIsEdit(true)}>
               Editar
             </Button>
           </Stack>

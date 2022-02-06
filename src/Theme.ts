@@ -24,6 +24,74 @@ const theme = extendTheme({
   },
 
   components: {
+    Text: {
+      variants: {
+        title: {
+          bg: 'transparent',
+          border: 'none',
+          fontSize: '1.2em',
+          padding: '0',
+          textAlign: 'center',
+          transition: 'all 400ms ease-in-out',
+          width: 'full',
+        },
+        user: {
+          bg: 'primaryDarker',
+          border: 'none',
+          borderRadius: '15px;',
+          paddingBlock: 4,
+          paddingInline: 4,
+        },
+        password: {
+          bg: 'primaryDarker',
+          border: 'none',
+          borderRadius: '15px;',
+          paddingBlockEnd: 3,
+          paddingBlockStart: 5,
+          paddingInline: 4,
+        },
+      },
+    },
+    Button: {
+      baseStyle: {
+        _focus: { boxShadow: 'none' },
+        _hover: {},
+        _active: {},
+        _disabled: {},
+      },
+
+      variants: {
+        primaryAction: {
+          bg: 'white',
+          color: 'black',
+          transition: 'all 200ms ease-in-out',
+        },
+        secondaryAction: {
+          border: '1px solid white',
+          bg: 'transparent',
+          transition: 'all 200ms ease-in-out',
+          _hover: {
+            bg: 'white',
+            color: 'black',
+          },
+        },
+        dangerAction: {
+          border: '1px solid white',
+          bg: 'transparent',
+          transition: 'all 200ms ease-in-out',
+          _hover: {
+            color: 'black',
+            bg: 'danger',
+            border: '1px solid',
+            borderColor: 'danger',
+          },
+        },
+      },
+
+      defaultProps: {
+        variant: '',
+      },
+    },
     List: {
       baseStyle: {
         container: {
