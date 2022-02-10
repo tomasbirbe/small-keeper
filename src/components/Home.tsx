@@ -10,10 +10,9 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
-import { RiFileCopyLine } from 'react-icons/ri';
-import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlinePlus } from 'react-icons/ai';
+import { AiOutlinePlus } from 'react-icons/ai';
 import { entry } from 'types/types';
 
 import AccountCard from './AccountCard/AccountCard';
@@ -21,6 +20,10 @@ import Modal from './Modal/Modal';
 import Overlay from './Modal/Overlay';
 import Field from './ModalForm/Field';
 import ModalForm from './ModalForm/ModalForm';
+import CreateEntryForm from './CreateEntryForm/CreateEntryForm';
+import ModalFooter from './Modal/ModalFooter';
+import User from './AccountCard/User';
+import Password from './AccountCard/Password';
 
 const INITIAL_ENTRIES = [
   { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
@@ -42,6 +45,7 @@ const INITIAL_ENTRY = {
 
 /* 
   1- Split code based on its functionality.
+    a. Split copyValue function on Password and user component to apply DRY
   2- Fix tabIndex default or tab order.
   3- Try with Kent c Dodd's modal model.
 */
@@ -54,8 +58,6 @@ export default function Home() {
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [isPasswordHide, setIsPasswordHide] = useState<boolean>(true);
-  const inputRef = useRef<any>();
   const toast = useToast();
 
   function openModal(entry: entry) {
@@ -96,12 +98,6 @@ export default function Home() {
     setEntries(sortedEntries);
     setEntry(modifiedEntry);
     setIsEdit(false);
-  }
-
-  function protectPassword(text: string) {
-    const password = text.replace(/./gi, '*');
-
-    return password;
   }
 
   useEffect(() => {
@@ -168,34 +164,6 @@ export default function Home() {
     e.target[1].value = '';
   }
 
-  function togglePasswordVisibility() {
-    if (isPasswordHide) {
-      setIsPasswordHide(false);
-    } else {
-      setIsPasswordHide(true);
-    }
-  }
-
-  function copyValue(value: string) {
-    navigator.clipboard.writeText(value);
-    toast({
-      duration: 2000,
-      position: 'top-right',
-      render: () => (
-        <Box
-          bg="primaryDarker"
-          borderRadius="15px"
-          paddingBlock={2}
-          paddingInline={6}
-          textAlign="center"
-          width="fit-content"
-        >
-          Copiado!
-        </Box>
-      ),
-    });
-  }
-
   return (
     <>
       <Box
@@ -235,19 +203,9 @@ export default function Home() {
 
       <Modal isOpen={isCreatingEntry} zIndex="1">
         <ModalForm id="createForm" showForm={isCreatingEntry} onSubmit={createEntry}>
-          <Text fontSize="1.4em">{entry?.name}</Text>
+          <CreateEntryForm title={entry?.name} />
           <Divider />
-          <Field id="newUser" inputRef={inputRef} label="Usuario" />
-          <Field id="newPassword" label="Clave" type="password" />
-          <Divider />
-          <Stack flexDirection="row" justify="space-between" spacing={0}>
-            <Button variant="secondaryAction" onClick={closeNewEntryModal}>
-              Cancelar
-            </Button>
-            <Button form="createForm" type="submit" variant="primaryAction">
-              Guardar
-            </Button>
-          </Stack>
+          <ModalFooter secondaryAction={closeNewEntryModal} />
         </ModalForm>
       </Modal>
 
@@ -260,45 +218,8 @@ export default function Home() {
             <Icon as={BsChevronDown} boxSize={5} color="primary" />
           </Button>
           <Text variant="title">{entry?.name}</Text>
-          <Stack
-            align="center"
-            bg="primaryDarker"
-            borderRadius="15px"
-            direction="row"
-            justify="space-between"
-            paddingBlock={2}
-            paddingInline={4}
-            spacing={0}
-          >
-            <Text>{entry?.user}</Text>
-            <Stack direction="row" spacing={0}>
-              <Button variant="iconButton" onClick={() => copyValue(entry?.user)}>
-                <Icon as={RiFileCopyLine} />
-              </Button>
-            </Stack>
-          </Stack>
-          <Stack
-            align="center"
-            bg="primaryDarker"
-            borderRadius="15px"
-            direction="row"
-            justify="space-between"
-            paddingBlock={2}
-            paddingInline={4}
-            spacing={0}
-          >
-            <Text marginBlockStart={isPasswordHide ? 2 : 0}>
-              {isPasswordHide ? protectPassword(entry?.password) : entry?.password}
-            </Text>
-            <Stack direction="row" spacing={0}>
-              <Button variant="iconButton" onClick={togglePasswordVisibility}>
-                <Icon as={isPasswordHide ? AiOutlineEye : AiOutlineEyeInvisible} />
-              </Button>
-              <Button variant="iconButton" onClick={() => copyValue(entry?.password)}>
-                <Icon as={RiFileCopyLine} />
-              </Button>
-            </Stack>
-          </Stack>
+          <User username={entry?.user} />
+          <Password password={entry?.password} />
 
           <Stack align="center" flexDirection="row" justify="space-between" spacing="0">
             <Button type="button" variant="dangerAction" onClick={() => setIsDeleting(true)}>
