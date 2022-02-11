@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function useProtectPassword(password: string) {
+function useProtectPassword(password: string) {
   const [isPasswordProtected, setisPasswordProtected] = useState(false);
 
   const protectedPassword = password.replace(/./gi, '*');
@@ -11,3 +11,5 @@ export default function useProtectPassword(password: string) {
 
   return { protectedPassword, isProtected: isPasswordProtected, toggleProtection };
 }
+
+export { useProtectPassword };

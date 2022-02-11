@@ -24,6 +24,7 @@ import CreateEntryForm from './CreateEntryForm/CreateEntryForm';
 import ModalFooter from './Modal/ModalFooter';
 import User from './AccountCard/User';
 import Password from './AccountCard/Password';
+import AccountCardData from './AccountCard/AccountCardData';
 
 const INITIAL_ENTRIES = [
   { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
@@ -216,18 +217,12 @@ export default function Home() {
           <Button height="fit-content" onClick={dismissModal}>
             <Icon as={BsChevronDown} boxSize={5} color="primary" />
           </Button>
-          <Text variant="title">{entry?.name}</Text>
-          <User username={entry?.user} />
-          <Password password={entry?.password} />
+          <AccountCardData password={entry?.password} title={entry?.name} username={entry?.user} />
 
-          <Stack align="center" flexDirection="row" justify="space-between" spacing="0">
-            <Button type="button" variant="dangerAction" onClick={() => setIsDeleting(true)}>
-              Eliminar
-            </Button>
-            <Button type="button" variant="primaryAction" onClick={() => setIsEdit(true)}>
-              Editar
-            </Button>
-          </Stack>
+          <ModalFooter
+            primaryAction={() => setIsDeleting(true)}
+            secondaryAction={() => setIsEdit(true)}
+          />
         </AccountCard>
       </Modal>
 

@@ -17,4 +17,4 @@ const useCopy = () => {
   return copyValue;
 };
 
-export default useCopy;
+export { useCopy };
