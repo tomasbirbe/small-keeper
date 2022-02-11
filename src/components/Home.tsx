@@ -10,7 +10,7 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { entry } from 'types/types';
@@ -18,10 +18,11 @@ import { entry } from 'types/types';
 import AccountCard from './AccountCard/AccountCard';
 import Modal from './Modal/Modal';
 import Overlay from './Modal/Overlay';
-import ModalForm from './ModalForm/ModalForm';
+import ModalForm from './Modal/ModalForm/ModalForm';
 import CreateEntryForm from './CreateEntryForm/CreateEntryForm';
 import AccountCardData from './AccountCard/AccountCardData';
 import UpdateForm from './UpdateForm/UpdateForm';
+import Toast from './Notifications/Toast';
 
 const INITIAL_ENTRIES = [
   { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
@@ -50,51 +51,46 @@ const orderEntries = (entryArray: entry[]) => {
 /* -------------------------------------------------------------------------- */
 
 /* 
-  1- Split code based on its functionality.
-  2- Fix tabIndex default or tab order.
-  3- Try with Kent c Dodd's modal model.
+  1- Try with Kent c Dodd's modal model.
 */
 
 export default function Home() {
   const [entries, setEntries] = useState(() => orderEntries(INITIAL_ENTRIES));
   const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
-  const [, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
   const [isCreatingEntry, setIsCreatingEntry] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const testRef = useRef();
   const toast = useToast();
 
-  function openModal(entry: entry) {
+  // Account card
+
+  function openAccountCard(entry: entry) {
     setModalIsOpen(true);
     setEntry(entry);
-    setModifiedEntry(entry);
   }
 
-  function dismissModal() {
+  function dismissAccountCard() {
     setModalIsOpen(false);
     if (isEdit) {
       setIsEdit(false);
     }
   }
 
+  // Edit mode
+
   function abortEdit() {
-    setModifiedEntry(entry);
+    (document.getElementById('modifyAccountName') as HTMLInputElement).value = entry?.name;
+    (document.getElementById('modifyUser') as HTMLInputElement).value = entry?.user;
+    (document.getElementById('modifyPassword') as HTMLInputElement).value = entry?.password;
     setIsEdit(false);
   }
 
-  function deleteEntry() {
-    const filteredEntries = entries.filter((ent) => ent.id !== entry.id);
-
-    setEntries(filteredEntries);
-    setIsDeleting(false);
-    dismissModal();
-  }
-
-  function saveEntry(e: any) {
+  function saveUpdatedEntry(e: any) {
     e.preventDefault();
     const [accountName, username, password] = e.target;
-    const modifyEntry = {
+    const modifiedEntry = {
       ...entry,
       name: accountName.value,
       user: username.value,
@@ -102,26 +98,16 @@ export default function Home() {
     };
     const deletedEntry = entries.filter((ent) => ent.id !== entry.id);
 
-    const updatedEntries = [...deletedEntry, modifyEntry];
+    const updatedEntries = [...deletedEntry, modifiedEntry];
 
     setEntries(orderEntries(updatedEntries));
-    setEntry(modifyEntry);
+    setEntry(modifiedEntry);
     setIsEdit(false);
   }
 
-  useEffect(() => {
-    if (isCreatingEntry) {
-      (document.querySelector('#newUser') as HTMLInputElement).focus();
-    }
-  }, [isCreatingEntry]);
+  //  New Entry Modal
 
-  useEffect(() => {
-    if (isEdit === true) {
-      (document.querySelector('#modifyAccountName') as HTMLInputElement).focus();
-    }
-  }, [isEdit]);
-
-  function createNewEntry(e: any) {
+  function openCreateEntryModal(e: any) {
     e.preventDefault();
     const newEntry = e.target[0].value.trim();
 
@@ -130,18 +116,7 @@ export default function Home() {
       toast({
         duration: 2000,
         position: 'top-right',
-        render: () => (
-          <Box
-            bg="primaryDarker"
-            borderRadius="15px"
-            paddingBlock={2}
-            paddingInline={6}
-            textAlign="center"
-            width="fit-content"
-          >
-            <Text>La cuenta debe tener un nombre</Text>
-          </Box>
-        ),
+        render: () => <Toast msg="La cuenta debe tener un nombre" />,
       });
 
       return '';
@@ -173,6 +148,16 @@ export default function Home() {
     e.target[1].value = '';
   }
 
+  // Confirm Delete modal
+
+  function deleteEntry() {
+    const filteredEntries = entries.filter((ent) => ent.id !== entry.id);
+
+    setEntries(filteredEntries);
+    setIsDeleting(false);
+    dismissAccountCard();
+  }
+
   return (
     <>
       <Box
@@ -186,7 +171,7 @@ export default function Home() {
         <Box as="article" maxWidth="700px" paddingBlock={10} paddingInline={7} width="full">
           <List align="center" justify="flex-start" listStyleType="none">
             <ListItem paddingBlock={2} paddingInlineEnd={4} paddingInlineStart={1}>
-              <Stack as="form" direction="row" onSubmit={createNewEntry}>
+              <Stack as="form" direction="row" onSubmit={openCreateEntryModal}>
                 <Input
                   autoFocus
                   _focus={{}}
@@ -200,7 +185,7 @@ export default function Home() {
               </Stack>
             </ListItem>
             {entries.map((entry) => (
-              <ListItem key={entry.id} onClick={() => openModal(entry)}>
+              <ListItem key={entry.id} onClick={() => openAccountCard(entry)}>
                 {entry.name}
               </ListItem>
             ))}
@@ -229,9 +214,9 @@ export default function Home() {
       {/* Account modal */}
 
       <Modal isOpen={modalIsOpen}>
-        <Overlay hideModal={dismissModal} />
+        <Overlay hideModal={dismissAccountCard} />
         <AccountCard isEntryDataOpen={modalIsOpen}>
-          <Button height="fit-content" onClick={dismissModal}>
+          <Button height="fit-content" onClick={dismissAccountCard}>
             <Icon as={BsChevronDown} boxSize={5} color="primary" />
           </Button>
           <AccountCardData password={entry?.password} title={entry?.name} username={entry?.user} />
@@ -250,8 +235,13 @@ export default function Home() {
       {/* Update modal */}
 
       <Modal isOpen={isEdit} zIndex="1">
-        <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveEntry}>
-          <UpdateForm accountName={entry?.name} password={entry?.password} username={entry?.user} />
+        <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveUpdatedEntry}>
+          <UpdateForm
+            accountName={entry?.name}
+            inputRef={testRef}
+            password={entry?.password}
+            username={entry?.user}
+          />
           <Stack flexDirection="row" justify="space-between" spacing={0}>
             <Button variant="secondary" onClick={abortEdit}>
               Cancelar

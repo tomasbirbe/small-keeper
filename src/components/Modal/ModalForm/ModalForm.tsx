@@ -13,7 +13,6 @@ const ModalForm = ({ children, showForm, id, onSubmit }: params) => {
     <Stack
       as="form"
       bg="secondary"
-      // bottom={isEdit ? '0' : '0'}
       borderRadius="15px"
       boxShadow="0px 1.1px 3.5px rgba(0, 0, 0, 0.051),
       0px 2.7px 8.3px rgba(41, 36, 36, 0.073),
@@ -29,7 +28,6 @@ const ModalForm = ({ children, showForm, id, onSubmit }: params) => {
       opacity={showForm ? '1' : '0'}
       paddingBlock={5}
       paddingInline={6}
-      // transition="all 1000ms cubic-bezier(.43,0,0,1.24)"
       position="relative"
       transition="all 200ms ease-in-out"
       width="90%"

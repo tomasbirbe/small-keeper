@@ -1,5 +1,5 @@
 import { useToast } from '@chakra-ui/react';
-import ToastCopy from 'components/Notifications/ToastCopy';
+import Toast from 'components/Notifications/Toast';
 import React from 'react';
 
 const useCopy = () => {
@@ -10,7 +10,7 @@ const useCopy = () => {
     toast({
       duration: 2000,
       position: 'top-right',
-      render: () => <ToastCopy />,
+      render: () => <Toast msg="Copiado!" />,
     });
   }
 

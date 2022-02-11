@@ -1,7 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import React from 'react';
 
-const ToastCopy = () => {
+const Toast = ({ msg }: { msg: string }) => {
   return (
     <Box
       bg="primaryDarker"
@@ -16,4 +16,4 @@ const ToastCopy = () => {
   );
 };
 
-export default ToastCopy;
+export default Toast;

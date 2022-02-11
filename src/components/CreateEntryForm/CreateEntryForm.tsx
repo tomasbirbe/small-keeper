@@ -1,5 +1,5 @@
 import { Divider, Text } from '@chakra-ui/react';
-import Field from 'components/ModalForm/Field';
+import Field from 'components/Modal/ModalForm/Field';
 import React from 'react';
 
 const CreateEntryForm = ({ title }: { title: string }) => {

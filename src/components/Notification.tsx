@@ -1,7 +1,12 @@
 import { Box, Text } from '@chakra-ui/react';
 import React from 'react';
 
-const UpdateNotification = ({ isEdit }: { isEdit: boolean }) => {
+interface Params {
+  isVisible: boolean;
+  message: string;
+}
+
+const Notification = ({ isVisible, message }: Params) => {
   return (
     <Box
       bg="danger"
@@ -11,16 +16,16 @@ const UpdateNotification = ({ isEdit }: { isEdit: boolean }) => {
       maxWidth="700px"
       placeItems="center"
       position="absolute"
-      top={isEdit ? '0' : '-50px'}
+      top={isVisible ? '0' : '-50px'}
       transitionDuration="400ms"
       transitionProperty="all"
       transitionTimingFunction="ease-in-out"
       width="full"
       zIndex={2}
     >
-      <Text>Modo edicion</Text>
+      <Text>{message}</Text>
     </Box>
   );
 };
 
-export default UpdateNotification;
+export default Notification;
