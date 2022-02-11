@@ -45,7 +45,6 @@ const INITIAL_ENTRY = {
 
 /* 
   1- Split code based on its functionality.
-    a. Split copyValue function on Password and user component to apply DRY
   2- Fix tabIndex default or tab order.
   3- Try with Kent c Dodd's modal model.
 */

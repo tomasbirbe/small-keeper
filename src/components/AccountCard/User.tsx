@@ -1,19 +1,10 @@
-import { Stack, Button, Icon, Text, useToast } from '@chakra-ui/react';
-import ToastCopy from 'components/Notifications/ToastCopy';
+import { Stack, Button, Icon, Text } from '@chakra-ui/react';
+import useCopy from 'hooks/useCopy';
 import React from 'react';
 import { RiFileCopyLine } from 'react-icons/ri';
 
 const User = ({ username }: { username: string }) => {
-  const toast = useToast;
-
-  function copyValue(value: string) {
-    navigator.clipboard.writeText(value);
-    toast({
-      duration: 2000,
-      position: 'top-right',
-      render: () => <ToastCopy />,
-    });
-  }
+  const copyValue = useCopy();
 
   return (
     <>

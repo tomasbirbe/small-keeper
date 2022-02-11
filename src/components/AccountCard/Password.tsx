@@ -1,5 +1,5 @@
-import { Button, Icon, Stack, Text, useToast } from '@chakra-ui/react';
-import ToastCopy from 'components/Notifications/ToastCopy';
+import { Button, Icon, Stack, Text } from '@chakra-ui/react';
+import useCopy from 'hooks/useCopy';
 import useProtectPassword from 'hooks/useProtectPassword';
 import React from 'react';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
@@ -7,16 +7,7 @@ import { RiFileCopyLine } from 'react-icons/ri';
 
 const Password = ({ password }: { password: string }) => {
   const { isProtected, toggleProtection, protectedPassword } = useProtectPassword(password);
-  const toast = useToast();
-
-  function copyValue(value: string) {
-    navigator.clipboard.writeText(value);
-    toast({
-      duration: 2000,
-      position: 'top-right',
-      render: () => <ToastCopy />,
-    });
-  }
+  const copyValue = useCopy();
 
   return (
     <Stack
