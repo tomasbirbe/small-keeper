@@ -134,7 +134,7 @@ export default function Home() {
 
   function createEntry(e: any) {
     e.preventDefault();
-    setEntries([
+    const updatedEntries = [
       ...entries,
       {
         ...entry,
@@ -142,7 +142,9 @@ export default function Home() {
         user: e.target[0].value,
         password: e.target[1].value,
       },
-    ]);
+    ];
+
+    setEntries(orderEntries(updatedEntries));
     setIsCreatingEntry(false);
     e.target[0].value = '';
     e.target[1].value = '';

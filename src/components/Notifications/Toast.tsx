@@ -11,7 +11,7 @@ const Toast = ({ msg }: { msg: string }) => {
       textAlign="center"
       width="fit-content"
     >
-      Copiado!
+      {msg}
     </Box>
   );
 };
