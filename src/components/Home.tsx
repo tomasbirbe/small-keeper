@@ -18,13 +18,10 @@ import { entry } from 'types/types';
 import AccountCard from './AccountCard/AccountCard';
 import Modal from './Modal/Modal';
 import Overlay from './Modal/Overlay';
-import Field from './ModalForm/Field';
 import ModalForm from './ModalForm/ModalForm';
 import CreateEntryForm from './CreateEntryForm/CreateEntryForm';
-import ModalFooter from './Modal/ModalFooter';
-import User from './AccountCard/User';
-import Password from './AccountCard/Password';
 import AccountCardData from './AccountCard/AccountCardData';
+import UpdateForm from './UpdateForm/UpdateForm';
 
 const INITIAL_ENTRIES = [
   { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
@@ -40,6 +37,14 @@ const INITIAL_ENTRY = {
   password: '',
 };
 
+const orderEntries = (entryArray: entry[]) => {
+  const sortedEntries = entryArray.sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+
+  return sortedEntries;
+};
+
 /* -------------------------------------------------------------------------- */
 /*                                    To do                                   */
 /* -------------------------------------------------------------------------- */
@@ -51,9 +56,9 @@ const INITIAL_ENTRY = {
 */
 
 export default function Home() {
-  const [entries, setEntries] = useState(INITIAL_ENTRIES);
+  const [entries, setEntries] = useState(() => orderEntries(INITIAL_ENTRIES));
   const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
-  const [modifiedEntry, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
+  const [, setModifiedEntry] = useState<entry>(INITIAL_ENTRY);
   const [isCreatingEntry, setIsCreatingEntry] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -88,15 +93,19 @@ export default function Home() {
 
   function saveEntry(e: any) {
     e.preventDefault();
-    const filteredEntries = entries.filter((ent) => ent.id !== entry.id);
-    const updatedEntries = [...filteredEntries, modifiedEntry];
+    const [accountName, username, password] = e.target;
+    const modifyEntry = {
+      ...entry,
+      name: accountName.value,
+      user: username.value,
+      password: password.value,
+    };
+    const deletedEntry = entries.filter((ent) => ent.id !== entry.id);
 
-    const sortedEntries = updatedEntries.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
+    const updatedEntries = [...deletedEntry, modifyEntry];
 
-    setEntries(sortedEntries);
-    setEntry(modifiedEntry);
+    setEntries(orderEntries(updatedEntries));
+    setEntry(modifyEntry);
     setIsEdit(false);
   }
 
@@ -205,7 +214,15 @@ export default function Home() {
         <ModalForm id="createForm" showForm={isCreatingEntry} onSubmit={createEntry}>
           <CreateEntryForm title={entry?.name} />
           <Divider />
-          <ModalFooter secondaryAction={closeNewEntryModal} />
+
+          <Stack flexDirection="row" justify="space-between" spacing={0}>
+            <Button variant="secondary" onClick={closeNewEntryModal}>
+              Eliminar
+            </Button>
+            <Button type="submit" variant="primary">
+              Guardar
+            </Button>
+          </Stack>
         </ModalForm>
       </Modal>
 
@@ -219,10 +236,14 @@ export default function Home() {
           </Button>
           <AccountCardData password={entry?.password} title={entry?.name} username={entry?.user} />
 
-          <ModalFooter
-            primaryAction={() => setIsDeleting(true)}
-            secondaryAction={() => setIsEdit(true)}
-          />
+          <Stack flexDirection="row" justify="space-between" spacing={0}>
+            <Button type="button" variant="secondary" onClick={() => setIsDeleting(true)}>
+              Eliminar
+            </Button>
+            <Button type="button" variant="primary" onClick={() => setIsEdit(true)}>
+              Editar
+            </Button>
+          </Stack>
         </AccountCard>
       </Modal>
 
@@ -230,33 +251,12 @@ export default function Home() {
 
       <Modal isOpen={isEdit} zIndex="1">
         <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveEntry}>
-          <Field
-            id="modifyAccountName"
-            label="Nombre de la cuenta"
-            value={modifiedEntry?.name}
-            onChange={(e) => setModifiedEntry({ ...modifiedEntry, name: e.target.value })}
-          />
-          <Divider />
-          <Field
-            id="modifyUser"
-            label="Usuario"
-            value={modifiedEntry?.user}
-            onChange={(e) => setModifiedEntry({ ...modifiedEntry, user: e.target.value })}
-          />
-          <Divider />
-          <Field
-            id="modifyPassword"
-            label="Clave"
-            type="password"
-            value={modifiedEntry?.password}
-            onChange={(e) => setModifiedEntry({ ...modifiedEntry, password: e.target.value })}
-          />
-          <Divider />
+          <UpdateForm accountName={entry?.name} password={entry?.password} username={entry?.user} />
           <Stack flexDirection="row" justify="space-between" spacing={0}>
-            <Button variant="secondaryAction" onClick={abortEdit}>
+            <Button variant="secondary" onClick={abortEdit}>
               Cancelar
             </Button>
-            <Button form="updateForm" type="submit" variant="primaryAction">
+            <Button type="submit" variant="primary">
               Guardar
             </Button>
           </Stack>
@@ -280,10 +280,10 @@ export default function Home() {
           </Box>
           <Divider />
           <Stack direction="row" justify="space-between">
-            <Button variant="primaryAction" onClick={() => setIsDeleting(false)}>
+            <Button variant="primary" onClick={() => setIsDeleting(false)}>
               Cancelar
             </Button>
-            <Button variant="dangerAction" onClick={deleteEntry}>
+            <Button variant="danger" onClick={deleteEntry}>
               Eliminar
             </Button>
           </Stack>
