@@ -75,12 +75,12 @@ const theme = extendTheme({
       },
 
       variants: {
-        primaryAction: {
+        primary: {
           bg: 'white',
           color: 'black',
           transition: 'all 200ms ease-in-out',
         },
-        secondaryAction: {
+        secondary: {
           border: '1px solid white',
           bg: 'transparent',
           transition: 'all 200ms ease-in-out',
@@ -89,7 +89,7 @@ const theme = extendTheme({
             color: 'black',
           },
         },
-        dangerAction: {
+        danger: {
           border: '1px solid white',
           bg: 'transparent',
           transition: 'all 200ms ease-in-out',
