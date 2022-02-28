@@ -10,10 +10,12 @@ import {
   Text,
   useToast,
 } from '@chakra-ui/react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { Entry } from 'types/types';
+import localforage from 'localforage';
+import { useProtectPassword } from 'hooks';
 
 import AccountCard from './AccountCard/AccountCard';
 import Modal from './Modal/Modal';
@@ -55,7 +57,7 @@ const orderEntries = (entryArray: Entry[]) => {
 */
 
 export default function Home() {
-  const [entries, setEntries] = useState(() => orderEntries(INITIAL_ENTRIES));
+  const [entries, setEntries] = useState<Entry[]>([]);
   const [entry, setEntry] = useState<Entry>(INITIAL_ENTRY);
   const [isCreatingEntry, setIsCreatingEntry] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
@@ -63,6 +65,23 @@ export default function Home() {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const testRef = useRef();
   const toast = useToast();
+
+  useEffect(() => {
+    const accountsData: any[] = [];
+
+    localforage.config({
+      driver: localforage.INDEXEDDB,
+      name: 'Small Keeper',
+      storeName: 'accounts',
+    });
+    localforage
+      .iterate((value) => {
+        accountsData.push(value);
+      })
+      .then(() => {
+        setEntries(accountsData);
+      });
+  }, []);
 
   // Account card
 
@@ -81,7 +100,7 @@ export default function Home() {
   // Edit mode
 
   function abortEdit() {
-    (document.getElementById('modifyAccountName') as HTMLInputElement).value = entry?.account;
+    (document.getElementById('modifyAccount') as HTMLInputElement).value = entry?.account;
     (document.getElementById('modifyUser') as HTMLInputElement).value = entry?.user;
     (document.getElementById('modifyPassword') as HTMLInputElement).value = entry?.password;
     setIsEdit(false);
@@ -89,10 +108,10 @@ export default function Home() {
 
   function saveUpdatedEntry(e: any) {
     e.preventDefault();
-    const [accountName, username, password] = e.target;
+    const [account, username, password] = e.target;
     const modifiedEntry = {
       ...entry,
-      name: accountName.value,
+      name: account.value,
       user: username.value,
       password: password.value,
     };
@@ -100,6 +119,7 @@ export default function Home() {
 
     const updatedEntries = [...deletedEntry, modifiedEntry];
 
+    localforage.setItem(`${modifiedEntry.id}`, modifiedEntry);
     setEntries(orderEntries(updatedEntries));
     setEntry(modifiedEntry);
     setIsEdit(false);
@@ -121,8 +141,8 @@ export default function Home() {
 
       return '';
     }
+    setEntry({ ...entry, account: e.target[0].value });
     setIsCreatingEntry(true);
-    setEntry({ ...entry, user: e.target[0].value });
     e.target[0].value = '';
   }
 
@@ -134,16 +154,16 @@ export default function Home() {
 
   function createEntry(e: any) {
     e.preventDefault();
-    const updatedEntries = [
-      ...entries,
-      {
-        ...entry,
-        id: Math.random() * 1000 * new Date().getTime(),
-        user: e.target[0].value,
-        password: e.target[1].value,
-      },
-    ];
+    const newEntry = {
+      ...entry,
+      id: Math.random() * 1000 * new Date().getTime(),
+      user: e.target[0].value,
+      password: e.target[1].value,
+    };
 
+    const updatedEntries = [...entries, newEntry];
+
+    localforage.setItem(`${newEntry.id}`, newEntry);
     setEntries(orderEntries(updatedEntries));
     setIsCreatingEntry(false);
     e.target[0].value = '';
@@ -155,6 +175,7 @@ export default function Home() {
   function deleteEntry() {
     const filteredEntries = entries.filter((ent) => ent.id !== entry.id);
 
+    localforage.removeItem(`${entry.id}`);
     setEntries(filteredEntries);
     setIsDeleting(false);
     dismissAccountCard();
@@ -199,12 +220,12 @@ export default function Home() {
 
       <Modal isOpen={isCreatingEntry} zIndex="1">
         <ModalForm id="createForm" showForm={isCreatingEntry} onSubmit={createEntry}>
-          <CreateEntryForm title={entry?.account} />
+          <CreateEntryForm account={entry.account} />
           <Divider />
 
           <Stack flexDirection="row" justify="space-between" spacing={0}>
             <Button variant="secondary" onClick={closeNewEntryModal}>
-              Eliminar
+              Cancelar
             </Button>
             <Button type="submit" variant="primary">
               Guardar
@@ -221,11 +242,7 @@ export default function Home() {
           <Button height="fit-content" onClick={dismissAccountCard}>
             <Icon as={BsChevronDown} boxSize={5} color="primary" />
           </Button>
-          <AccountCardData
-            password={entry?.password}
-            title={entry?.account}
-            username={entry?.user}
-          />
+          <AccountCardData entry={entry} modalIsOpen={modalIsOpen} />
 
           <Stack flexDirection="row" justify="space-between" spacing={0}>
             <Button type="button" variant="secondary" onClick={() => setIsDeleting(true)}>
@@ -242,12 +259,7 @@ export default function Home() {
 
       <Modal isOpen={isEdit} zIndex="1">
         <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveUpdatedEntry}>
-          <UpdateForm
-            accountName={entry?.account}
-            inputRef={testRef}
-            password={entry?.password}
-            username={entry?.user}
-          />
+          <UpdateForm entry={entry} inputRef={testRef} />
           <Stack flexDirection="row" justify="space-between" spacing={0}>
             <Button variant="secondary" onClick={abortEdit}>
               Cancelar

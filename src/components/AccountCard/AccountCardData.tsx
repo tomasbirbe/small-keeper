@@ -1,22 +1,24 @@
 import { Button, Icon, Stack, Text } from '@chakra-ui/react';
 import { useCopy, useProtectPassword } from 'hooks';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { RiFileCopyLine } from 'react-icons/ri';
+import { Entry } from 'types/types';
 
-interface Params {
-  title: string;
-  username: string;
-  password: string;
-}
-
-const AccountCardData = ({ title, username, password }: Params) => {
+const AccountCardData = ({ entry, modalIsOpen }: { entry: Entry; modalIsOpen: boolean }) => {
+  const { account, user, password } = entry;
   const { isProtected, toggleProtection, protectedPassword } = useProtectPassword(password);
   const copyValue = useCopy();
 
+  useEffect(() => {
+    if (!isProtected && !modalIsOpen) {
+      toggleProtection();
+    }
+  }, [isProtected, modalIsOpen, toggleProtection]);
+
   return (
     <>
-      <Text variant="title">{title}</Text>
+      <Text variant="title">{account}</Text>
       <Stack
         align="center"
         bg="primaryDarker"
@@ -27,9 +29,9 @@ const AccountCardData = ({ title, username, password }: Params) => {
         paddingInline={4}
         spacing={0}
       >
-        <Text>{username}</Text>
+        <Text>{user}</Text>
         <Stack direction="row" spacing={0}>
-          <Button variant="iconButton" onClick={() => copyValue(username)}>
+          <Button variant="iconButton" onClick={() => copyValue(user)}>
             <Icon as={RiFileCopyLine} />
           </Button>
         </Stack>

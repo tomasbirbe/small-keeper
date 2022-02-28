@@ -13,6 +13,7 @@
     "@fontsource/karla": "^4.5.1",
     "eslint-plugin-react-hooks": "^4.3.0",
     "framer-motion": "^5.6.0",
+    "localforage": "^1.10.0",
     "prettier": "^2.5.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
