@@ -13,7 +13,7 @@ import {
 import React, { useRef, useState } from 'react';
 import { BsChevronDown } from 'react-icons/bs';
 import { AiOutlinePlus } from 'react-icons/ai';
-import { entry } from 'types/types';
+import { Entry } from 'types/types';
 
 import AccountCard from './AccountCard/AccountCard';
 import Modal from './Modal/Modal';
@@ -25,22 +25,22 @@ import UpdateForm from './UpdateForm/UpdateForm';
 import Toast from './Notifications/Toast';
 
 const INITIAL_ENTRIES = [
-  { id: 1, name: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
-  { id: 2, name: 'Naranja', user: 'Tomas', password: 'Birbe' },
-  { id: 3, name: 'League of Legends', user: 'Tomas', password: 'Birbe' },
-  { id: 4, name: 'Twitter', user: 'Tomas', password: 'Birbe' },
+  { id: 1, account: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
+  { id: 2, account: 'Naranja', user: 'Tomas', password: 'Birbe' },
+  { id: 3, account: 'League of Legends', user: 'Tomas', password: 'Birbe' },
+  { id: 4, account: 'Twitter', user: 'Tomas', password: 'Birbe' },
 ];
 
 const INITIAL_ENTRY = {
   id: 0,
-  name: '',
+  account: '',
   user: '',
   password: '',
 };
 
-const orderEntries = (entryArray: entry[]) => {
+const orderEntries = (entryArray: Entry[]) => {
   const sortedEntries = entryArray.sort((a, b) => {
-    return a.name.localeCompare(b.name);
+    return a.account.localeCompare(b.account);
   });
 
   return sortedEntries;
@@ -56,7 +56,7 @@ const orderEntries = (entryArray: entry[]) => {
 
 export default function Home() {
   const [entries, setEntries] = useState(() => orderEntries(INITIAL_ENTRIES));
-  const [entry, setEntry] = useState<entry>(INITIAL_ENTRY);
+  const [entry, setEntry] = useState<Entry>(INITIAL_ENTRY);
   const [isCreatingEntry, setIsCreatingEntry] = useState<boolean>(false);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
@@ -66,7 +66,7 @@ export default function Home() {
 
   // Account card
 
-  function openAccountCard(entry: entry) {
+  function openAccountCard(entry: Entry) {
     setModalIsOpen(true);
     setEntry(entry);
   }
@@ -81,7 +81,7 @@ export default function Home() {
   // Edit mode
 
   function abortEdit() {
-    (document.getElementById('modifyAccountName') as HTMLInputElement).value = entry?.name;
+    (document.getElementById('modifyAccountName') as HTMLInputElement).value = entry?.account;
     (document.getElementById('modifyUser') as HTMLInputElement).value = entry?.user;
     (document.getElementById('modifyPassword') as HTMLInputElement).value = entry?.password;
     setIsEdit(false);
@@ -122,7 +122,7 @@ export default function Home() {
       return '';
     }
     setIsCreatingEntry(true);
-    setEntry({ ...entry, name: e.target[0].value });
+    setEntry({ ...entry, user: e.target[0].value });
     e.target[0].value = '';
   }
 
@@ -188,7 +188,7 @@ export default function Home() {
             </ListItem>
             {entries.map((entry) => (
               <ListItem key={entry.id} onClick={() => openAccountCard(entry)}>
-                {entry.name}
+                {entry.account}
               </ListItem>
             ))}
           </List>
@@ -199,7 +199,7 @@ export default function Home() {
 
       <Modal isOpen={isCreatingEntry} zIndex="1">
         <ModalForm id="createForm" showForm={isCreatingEntry} onSubmit={createEntry}>
-          <CreateEntryForm title={entry?.name} />
+          <CreateEntryForm title={entry?.account} />
           <Divider />
 
           <Stack flexDirection="row" justify="space-between" spacing={0}>
@@ -221,7 +221,11 @@ export default function Home() {
           <Button height="fit-content" onClick={dismissAccountCard}>
             <Icon as={BsChevronDown} boxSize={5} color="primary" />
           </Button>
-          <AccountCardData password={entry?.password} title={entry?.name} username={entry?.user} />
+          <AccountCardData
+            password={entry?.password}
+            title={entry?.account}
+            username={entry?.user}
+          />
 
           <Stack flexDirection="row" justify="space-between" spacing={0}>
             <Button type="button" variant="secondary" onClick={() => setIsDeleting(true)}>
@@ -239,7 +243,7 @@ export default function Home() {
       <Modal isOpen={isEdit} zIndex="1">
         <ModalForm id="updateForm" showForm={isEdit} onSubmit={saveUpdatedEntry}>
           <UpdateForm
-            accountName={entry?.name}
+            accountName={entry?.account}
             inputRef={testRef}
             password={entry?.password}
             username={entry?.user}
@@ -268,7 +272,7 @@ export default function Home() {
         >
           <Box>
             <Text>Estas a punto de eliminar los datos de</Text>
-            <Text fontWeight="700">{entry?.name}</Text>
+            <Text fontWeight="700">{entry?.account}</Text>
           </Box>
           <Divider />
           <Stack direction="row" justify="space-between">

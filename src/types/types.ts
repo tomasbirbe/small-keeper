@@ -1,6 +1,6 @@
-export type entry = {
+export type Entry = {
   id: number;
-  name: string;
+  account: string;
   user: string;
   password: string;
 };
