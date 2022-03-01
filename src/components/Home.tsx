@@ -15,7 +15,6 @@ import { BsChevronDown } from 'react-icons/bs';
 import { AiOutlinePlus } from 'react-icons/ai';
 import { Entry } from 'types/types';
 import localforage from 'localforage';
-import { useProtectPassword } from 'hooks';
 
 import AccountCard from './AccountCard/AccountCard';
 import Modal from './Modal/Modal';
@@ -25,13 +24,6 @@ import CreateEntryForm from './CreateEntryForm/CreateEntryForm';
 import AccountCardData from './AccountCard/AccountCardData';
 import UpdateForm from './UpdateForm/UpdateForm';
 import Toast from './Notifications/Toast';
-
-const INITIAL_ENTRIES = [
-  { id: 1, account: 'Banco Nacion', user: 'Tomas', password: 'Birbe' },
-  { id: 2, account: 'Naranja', user: 'Tomas', password: 'Birbe' },
-  { id: 3, account: 'League of Legends', user: 'Tomas', password: 'Birbe' },
-  { id: 4, account: 'Twitter', user: 'Tomas', password: 'Birbe' },
-];
 
 const INITIAL_ENTRY = {
   id: 0,
